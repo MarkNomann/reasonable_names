@@ -1,0 +1,470 @@
+{
+  "name": "reasonable_names",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{$json.id}}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1392,
+        64
+      ],
+      "id": "d0fcc279-8a16-4dd3-b7bb-e96eb47caa03",
+      "name": "Download file",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "RZ5BvwHBaUHztC6G",
+          "name": "Google Drive account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1312,
+        -224
+      ],
+      "id": "ac833e51-3bbf-495c-8f2a-bb13e609856c",
+      "name": "No Operation, do nothing1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "modelId": {
+          "__rl": true,
+          "value": "llava-phi3:latest",
+          "mode": "list",
+          "cachedResultName": "llava-phi3:latest"
+        },
+        "text": "=Describe image for yourself and give appropriate name to it.Don't imagine anything yourself.\nWrite new name into {{ $json.name }} field and keep {{ $json.id }} field as it is.\nFollow the next 5 rules for image naming:\n\n1. Field \"name\" should be readable in english. \n2. All words must be separated by underscores\n3. No digits allowed at all.\n4. All names should not contain whitespaces at all.\n5. Do not mention names of any countries and cities and castles in \"name\" field if it's not written on an image.\n\nKeep in output only new name with an extension like it was before and {{ $json.id }} \n{\n  \"id\": \"{{ $json.id }}\",\n  \"name\": \"new name\", plus file extension like .jpg .jpeg .png\n}\n\n",
+        "options": {
+          "low_vram": true,
+          "num_batch": 256
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.ollama",
+      "typeVersion": 1,
+      "position": [
+        1712,
+        80
+      ],
+      "id": "ea8ce012-0c89-4eba-81ff-4bc7ae8166ee",
+      "name": "Analyze image",
+      "alwaysOutputData": true,
+      "credentials": {
+        "ollamaApi": {
+          "id": "b01aHzdDX6mSkPej",
+          "name": "Ollama account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        848,
+        -272
+      ],
+      "id": "f8a81a25-4846-4784-9a4c-63735d37b59a",
+      "name": "No Operation, do nothing",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ee82c108-d575-45c2-94a2-669b03259f45",
+              "name": "=id",
+              "value": "={{ $json.content.match(/\"id\"\\s*:\\s*\"([^\"]+)\"/)?.[1] || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "9bc20224-b2b6-4f89-8103-732f651e9dbb",
+              "name": "=name",
+              "value": "={{ (() => { let raw = $json.content.replace(/```json/gi, '').replace(/```/g, ''); let cleaned = raw.replace(/\"([^\"]*)\"\\s*\\+\\s*\"([^\"]*)\"/g, '\"$1$2\"'); let match = cleaned.match(/\"name\"\\s*:\\s*\"([^\"]+)\"/); let name = match ? match[1] : ''; return /\\.(jpg|jpeg|png|gif|webp)$/i.test(name) ? name : name + '.jpg'; })() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1968,
+        80
+      ],
+      "id": "b5e8bdd5-5510-4025-8db2-392339ed8bf5",
+      "name": "Edit Fields",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "formTitle": "Configuration",
+        "formDescription": "Configure a folder to check for photos",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Folder name"
+            },
+            {
+              "fieldLabel": "Email to notify about when job is done",
+              "fieldType": "email"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -240,
+        -32
+      ],
+      "id": "8669f942-01f3-46e7-b471-26246ad56f5a",
+      "name": "On form submission",
+      "webhookId": "e14f0167-68b2-45b7-9ebc-b236a9b915f2",
+      "alwaysOutputData": true,
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "=",
+        "returnAll": true,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "={{ $json.id }}",
+            "mode": "id"
+          }
+        },
+        "options": {
+          "fields": [
+            "mimeType",
+            "id",
+            "name"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        256,
+        -48
+      ],
+      "id": "40f2d922-a3fc-4d48-8bd0-48c26f5d7f1b",
+      "name": "get files in folder",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "RZ5BvwHBaUHztC6G",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "={{ $json['Folder name'] }}",
+        "returnAll": true,
+        "filter": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        32,
+        -48
+      ],
+      "id": "1615fa19-a7a1-4753-893b-8f4693838de1",
+      "name": "Get folder name",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "RZ5BvwHBaUHztC6G",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        656,
+        -16
+      ],
+      "id": "33e93d01-2752-4a03-b6f5-dd152a5a52ba",
+      "name": "Loop Over Items",
+      "alwaysOutputData": false,
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('On form submission').item.json['Email to notify about when job is done'] }}",
+        "subject": "Update images name report",
+        "emailType": "text",
+        "message": "Images names updated.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        592,
+        -400
+      ],
+      "id": "29c761be-1349-4334-9638-be176961721b",
+      "name": "Send notification",
+      "webhookId": "35eafdde-4ea0-478b-8ad9-0533bc5f0be9",
+      "executeOnce": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "KFPGbHJv7LkB4ouE",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "newUpdatedFileName": "={{ $json.name }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1040,
+        320
+      ],
+      "id": "59f7efe6-e514-46d7-9f9e-b0f6add3f8fb",
+      "name": "Update image name",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "RZ5BvwHBaUHztC6G",
+          "name": "Google Drive account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "7027b381-0150-4ef4-8a7d-c74d7c6bc9ee",
+              "leftValue": "={{ $json.mimeType.startsWith(\"image/\") }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        928,
+        0
+      ],
+      "id": "8d4ea3b1-9e25-4abf-869a-976af2f144ac",
+      "name": "check for only images",
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Analyze image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze image": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Update image name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Get folder name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get files in folder": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get folder name": {
+      "main": [
+        [
+          {
+            "node": "get files in folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Send notification",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "check for only images",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send notification": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update image name": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "check for only images": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true,
+    "timeSavedMode": "fixed",
+    "timezone": "Europe/Andorra",
+    "saveDataSuccessExecution": "none",
+    "saveManualExecutions": false,
+    "callerPolicy": "workflowsFromSameOwner",
+    "saveDataErrorExecution": "none"
+  },
+  "versionId": "c52edcb1-b4ae-44d9-bf1a-baae80562326",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8e331f6e9dbc1a0bdaa8b033f60823d2768b34b9380cca0d81a8aca083d67ee2"
+  },
+  "nodeGroups": [],
+  "id": "CVyuAhjbFkfccY78",
+  "tags": []
+}
