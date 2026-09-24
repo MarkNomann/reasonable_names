@@ -1,0 +1,370 @@
+{
+  "name": "process_onedrive_images",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "c055762a-8fe7-4141-a639-df2372f30060",
+      "typeVersion": 1.1,
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        240,
+        320
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "fileId": "={{ $json.id }}"
+      },
+      "type": "n8n-nodes-base.microsoftOneDrive",
+      "typeVersion": 1.1,
+      "position": [
+        480,
+        320
+      ],
+      "id": "ab367adc-7acd-4ea9-aa35-aceb8ca7be73",
+      "name": "Get a file",
+      "alwaysOutputData": true,
+      "credentials": {
+        "microsoftOneDriveOAuth2Api": {
+          "id": "bt7M7NRHSVKBr13X",
+          "name": "Microsoft Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "folderId": "={{ $json.id }}"
+      },
+      "type": "n8n-nodes-base.microsoftOneDrive",
+      "typeVersion": 1.1,
+      "position": [
+        672,
+        320
+      ],
+      "id": "b7ee78fb-c785-4ebf-8776-e403b7144516",
+      "name": "Get items in a folder",
+      "credentials": {
+        "microsoftOneDriveOAuth2Api": {
+          "id": "bt7M7NRHSVKBr13X",
+          "name": "Microsoft Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5e72cb9e-4dfc-46ac-a1b3-12e6d46fbeb3",
+              "leftValue": "={{ $json.file.mimeType }}",
+              "rightValue": "image/",
+              "operator": {
+                "type": "string",
+                "operation": "startsWith"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1104,
+        432
+      ],
+      "id": "80486bab-fdd3-46fc-8893-13c1b7d3ce98",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        848,
+        336
+      ],
+      "id": "2c117f5c-08d4-433a-ad63-7a2244d7f5f0",
+      "name": "Loop Over Items",
+      "alwaysOutputData": false,
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "modelId": {
+          "__rl": true,
+          "value": "llava-phi3:latest",
+          "mode": "list",
+          "cachedResultName": "llava-phi3:latest"
+        },
+        "text": "=Describe image for yourself and give appropriate name to it.Don't imagine anything yourself.\nWrite new name into {{ $json.name }} field and keep {{ $json.id }} field as it is.\nFollow the next 5 rules for image naming:\n\n1. Field \"name\" should be readable in english. \n2. All words must be separated by underscores\n3. No digits allowed at all.\n4. All names should not contain whitespaces at all.\n5. Do not mention names of any countries and cities and castles in \"name\" field if it's not written on an image.\n\nKeep in output only new name with an extension like it was before and {{ $json.id }} \n{\n  \"id\": \"{{ $json.id }}\",\n  \"name\": \"new name\", plus file extension like .jpg .jpeg .png\n}\n\n",
+        "binaryPropertyName": "=data",
+        "options": {
+          "low_vram": true,
+          "num_batch": 256
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.ollama",
+      "typeVersion": 1,
+      "position": [
+        1376,
+        224
+      ],
+      "id": "fcb04076-bb98-4c30-9d35-b261f7c1c6c9",
+      "name": "Analyze image",
+      "alwaysOutputData": true,
+      "credentials": {
+        "ollamaApi": {
+          "id": "b01aHzdDX6mSkPej",
+          "name": "Ollama account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ee82c108-d575-45c2-94a2-669b03259f45",
+              "name": "=id",
+              "value": "={{ $json.content.match(/\"id\"\\s*:\\s*\"([^\"]+)\"/)?.[1] || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "9bc20224-b2b6-4f89-8103-732f651e9dbb",
+              "name": "=name",
+              "value": "={{ (() => { let raw = $json.content.replace(/```json/gi, '').replace(/```/g, ''); let cleaned = raw.replace(/\"([^\"]*)\"\\s*\\+\\s*\"([^\"]*)\"/g, '\"$1$2\"'); let match = cleaned.match(/\"name\"\\s*:\\s*\"([^\"]+)\"/); let name = match ? match[1] : ''; return /\\.(jpg|jpeg|png|gif|webp)$/i.test(name) ? name : name + '.jpg'; })() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1584,
+        272
+      ],
+      "id": "3979d130-69e4-489f-b0c7-fcf4c47143d4",
+      "name": "Edit Fields",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1376,
+        544
+      ],
+      "id": "0c4e49ba-754e-46f1-95e8-cc962dae047c",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "operation": "rename",
+        "itemId": "={{ $json.id }}",
+        "newName": "={{ $json.name }}"
+      },
+      "type": "n8n-nodes-base.microsoftOneDrive",
+      "typeVersion": 1.1,
+      "position": [
+        1776,
+        272
+      ],
+      "id": "1f3bedd2-4407-4831-a110-fb73b40923e9",
+      "name": "Rename a file",
+      "credentials": {
+        "microsoftOneDriveOAuth2Api": {
+          "id": "bt7M7NRHSVKBr13X",
+          "name": "Microsoft Drive account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json[\"@microsoft.graph.downloadUrl\"] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1136,
+        224
+      ],
+      "id": "4c366e0e-2f8a-49de-ad52-dff8057f0059",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1056,
+        64
+      ],
+      "id": "a2a3bc51-9abd-491a-b3d2-31f245e32a39",
+      "name": "No Operation, do nothing1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Get items in a folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get items in a folder": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze image": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Analyze image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Rename a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rename a file": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "47d66dc4-3157-4aa4-abcd-06dc8ceb7a5b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8e331f6e9dbc1a0bdaa8b033f60823d2768b34b9380cca0d81a8aca083d67ee2"
+  },
+  "nodeGroups": [],
+  "id": "ge1KuQ9caVSHvkP5",
+  "tags": []
+}
