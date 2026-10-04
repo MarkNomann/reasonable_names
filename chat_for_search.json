@@ -38,7 +38,7 @@
     {
       "parameters": {
         "mode": "retrieve-as-tool",
-        "toolDescription": "Look for image or images matching details from a query. Include link from your tool search\n",
+        "toolDescription": "Look for image or images matching details from a query. Include link from your tool search, if no link then do not include image in the output. If image has the same link like others then do not include it too. Give link with a filename without extension.\nFor each image have the following output:\n1. Image name\n2. Link\n3. Description of the image taken from embedding\n\nDo not add or imagine anything else by yourself.\n",
         "topK": 3,
         "options": {}
       },
@@ -146,7 +146,7 @@
     "binaryMode": "separate",
     "availableInMCP": true
   },
-  "versionId": "a5cf4b89-564b-4ec9-8cea-461b01a904ac",
+  "versionId": "9fe4a960-02fc-46ed-91e5-a00ef2e23ffd",
   "meta": {
     "instanceId": "8e331f6e9dbc1a0bdaa8b033f60823d2768b34b9380cca0d81a8aca083d67ee2"
   },
