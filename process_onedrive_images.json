@@ -23,7 +23,7 @@
       "type": "n8n-nodes-base.microsoftOneDrive",
       "typeVersion": 1.1,
       "position": [
-        480,
+        704,
         320
       ],
       "id": "ab367adc-7acd-4ea9-aa35-aceb8ca7be73",
@@ -44,7 +44,7 @@
       "type": "n8n-nodes-base.microsoftOneDrive",
       "typeVersion": 1.1,
       "position": [
-        672,
+        896,
         320
       ],
       "id": "b7ee78fb-c785-4ebf-8776-e403b7144516",
@@ -83,7 +83,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1104,
+        1328,
         432
       ],
       "id": "80486bab-fdd3-46fc-8893-13c1b7d3ce98",
@@ -96,7 +96,7 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        848,
+        1072,
         336
       ],
       "id": "2c117f5c-08d4-433a-ad63-7a2244d7f5f0",
@@ -123,7 +123,7 @@
       "type": "@n8n/n8n-nodes-langchain.ollama",
       "typeVersion": 1,
       "position": [
-        1376,
+        1600,
         224
       ],
       "id": "fcb04076-bb98-4c30-9d35-b261f7c1c6c9",
@@ -166,7 +166,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.5,
       "position": [
-        1584,
+        1808,
         272
       ],
       "id": "3979d130-69e4-489f-b0c7-fcf4c47143d4",
@@ -178,7 +178,7 @@
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        1376,
+        1600,
         544
       ],
       "id": "0c4e49ba-754e-46f1-95e8-cc962dae047c",
@@ -193,7 +193,7 @@
       "type": "n8n-nodes-base.microsoftOneDrive",
       "typeVersion": 1.1,
       "position": [
-        1776,
+        2000,
         272
       ],
       "id": "1f3bedd2-4407-4831-a110-fb73b40923e9",
@@ -214,7 +214,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        1136,
+        1360,
         224
       ],
       "id": "4c366e0e-2f8a-49de-ad52-dff8057f0059",
@@ -228,7 +228,7 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStorePGVector",
       "typeVersion": 1.3,
       "position": [
-        1600,
+        1824,
         -320
       ],
       "id": "d115922c-700e-4012-9a82-cb58aca2e48e",
@@ -247,7 +247,7 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
       "typeVersion": 1,
       "position": [
-        1552,
+        1776,
         0
       ],
       "id": "52f9bf7d-453e-4dd9-9962-6724ca0a49e9",
@@ -271,7 +271,7 @@
       "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
       "typeVersion": 1.1,
       "position": [
-        1680,
+        1904,
         -128
       ],
       "id": "0bf12a93-0607-404c-a23a-871d036f49f2",
@@ -282,7 +282,7 @@
       "type": "@n8n/n8n-nodes-langchain.textSplitterTokenSplitter",
       "typeVersion": 1,
       "position": [
-        1776,
+        2000,
         64
       ],
       "id": "5c46fff3-3b90-4c94-976c-51152fd874bd",
@@ -293,11 +293,67 @@
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        1008,
+        1232,
         0
       ],
       "id": "a2a3bc51-9abd-491a-b3d2-31f245e32a39",
       "name": "do nothing"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "88583236-bcbf-4ba6-b5b1-7648285713c6",
+              "leftValue": "={{ $json.id  }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        464,
+        320
+      ],
+      "id": "e852e76b-8f46-46e0-8529-b9d3261ca498",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "chatId": "453538615",
+        "text": "Fplder doesn't exist or wrong typing",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        688,
+        80
+      ],
+      "id": "c3ecd2b6-158f-45a9-b728-bf11b9a530e8",
+      "name": "Send a text message",
+      "webhookId": "87ba8133-2267-48e2-85cd-47b877f146bc",
+      "credentials": {
+        "telegramApi": {
+          "id": "5kcyPcjhEjAwrN5o",
+          "name": "Telegram account 2"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -306,7 +362,7 @@
       "main": [
         [
           {
-            "node": "Get a file",
+            "node": "If1",
             "type": "main",
             "index": 0
           }
@@ -468,15 +524,33 @@
       "main": [
         []
       ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
     "availableInMCP": true
   },
-  "versionId": "0f98b86c-5957-4d5c-a8e6-6e7e39955bc5",
+  "versionId": "0a06eaec-c961-4958-9182-65ae96e52934",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "8e331f6e9dbc1a0bdaa8b033f60823d2768b34b9380cca0d81a8aca083d67ee2"

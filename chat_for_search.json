@@ -8,8 +8,8 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
       "typeVersion": 1,
       "position": [
-        512,
-        480
+        976,
+        448
       ],
       "id": "af8bd1c9-be44-4e91-8b50-57a23ab02155",
       "name": "Embeddings Ollama1",
@@ -23,13 +23,15 @@
     },
     {
       "parameters": {
-        "options": {}
+        "options": {
+          "allowFileUploads": false
+        }
       },
       "type": "@n8n/n8n-nodes-langchain.chatTrigger",
       "typeVersion": 1.5,
       "position": [
-        0,
-        0
+        -144,
+        224
       ],
       "id": "3d3ed536-a989-4cd9-8631-609a8db85200",
       "name": "When chat message received",
@@ -38,15 +40,15 @@
     {
       "parameters": {
         "mode": "retrieve-as-tool",
-        "toolDescription": "Look for image or images matching details from a query. Include link from your tool search, if no link then do not include image in the output. If image has the same link like others then do not include it too. Give link with a filename without extension.\nFor each image have the following output:\n1. Image name\n2. Link\n3. Description of the image taken from embedding\n\nDo not add or imagine anything else by yourself.\n",
+        "toolDescription": "Look for image or images matching details from a query. Include link from your tool search, if no link then do not include image in the output. If image has the same link like others then do not include it too. Give link with a filename without extension.\nFor each image have the following format output:\n1. Name of the image\n2. Link to an image\n3. Description of the image taken from embedding\n\n\nDo not add or imagine anything else by yourself.\n",
         "topK": 3,
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.vectorStorePGVector",
       "typeVersion": 1.3,
       "position": [
-        496,
-        288
+        960,
+        240
       ],
       "id": "d566346d-89af-4d7e-922b-3f686880a512",
       "name": "search_image",
@@ -59,14 +61,14 @@
     },
     {
       "parameters": {
-        "promptType": "define",
-        "text": "={{ $json.chatInput }}",
+        "promptType": "=define",
+        "text": "={{ $json.message.text }}",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        416,
+        864,
         0
       ],
       "id": "aa1d1753-a688-4c18-97a4-cf7e284069d0",
@@ -80,8 +82,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
       "typeVersion": 1,
       "position": [
-        320,
-        208
+        784,
+        192
       ],
       "id": "615ae507-dd29-4c8b-ab42-c4015e21bc71",
       "name": "Ollama Chat Model",
@@ -89,6 +91,55 @@
         "ollamaApi": {
           "id": "b01aHzdDX6mSkPej",
           "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {
+          "download": true
+        }
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        512,
+        0
+      ],
+      "id": "1fcb54ae-2063-4d05-9000-05c62a2fae63",
+      "name": "Telegram Trigger",
+      "webhookId": "bdec5b1a-8e92-46c8-8821-34447eb2c603",
+      "credentials": {
+        "telegramApi": {
+          "id": "U0aYTRfPtb5Y49ub",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "453538615",
+        "text": "={{ $json.output }}",
+        "replyMarkup": "forceReply",
+        "forceReply": {},
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1232,
+        0
+      ],
+      "id": "246b3b30-38f5-463c-9607-830dab9dee8d",
+      "name": "Send a text message",
+      "webhookId": "123f0fcd-5a9f-473e-b00a-1901f2e301fb",
+      "credentials": {
+        "telegramApi": {
+          "id": "U0aYTRfPtb5Y49ub",
+          "name": "Telegram account"
         }
       }
     }
@@ -108,13 +159,7 @@
     },
     "When chat message received": {
       "main": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "search_image": {
@@ -138,6 +183,28 @@
           }
         ]
       ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -146,8 +213,9 @@
     "binaryMode": "separate",
     "availableInMCP": true
   },
-  "versionId": "9fe4a960-02fc-46ed-91e5-a00ef2e23ffd",
+  "versionId": "b0b71593-5e89-456f-afb5-204ccb51561e",
   "meta": {
+    "templateCredsSetupCompleted": true,
     "instanceId": "8e331f6e9dbc1a0bdaa8b033f60823d2768b34b9380cca0d81a8aca083d67ee2"
   },
   "nodeGroups": [],

@@ -14,7 +14,7 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        1616,
+        1840,
         64
       ],
       "id": "d0fcc279-8a16-4dd3-b7bb-e96eb47caa03",
@@ -34,7 +34,7 @@
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        1536,
+        1760,
         -224
       ],
       "id": "ac833e51-3bbf-495c-8f2a-bb13e609856c",
@@ -59,7 +59,7 @@
       "type": "@n8n/n8n-nodes-langchain.ollama",
       "typeVersion": 1,
       "position": [
-        1936,
+        2160,
         80
       ],
       "id": "ea8ce012-0c89-4eba-81ff-4bc7ae8166ee",
@@ -108,7 +108,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.5,
       "position": [
-        2192,
+        2416,
         80
       ],
       "id": "b5e8bdd5-5510-4025-8db2-392339ed8bf5",
@@ -149,8 +149,8 @@
       "type": "n8n-nodes-base.formTrigger",
       "typeVersion": 2.6,
       "position": [
-        -400,
-        -48
+        -912,
+        -272
       ],
       "id": "8669f942-01f3-46e7-b471-26246ad56f5a",
       "name": "On form submission",
@@ -182,8 +182,8 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        256,
-        -48
+        496,
+        -112
       ],
       "id": "40f2d922-a3fc-4d48-8bd0-48c26f5d7f1b",
       "name": "get files in folder",
@@ -198,7 +198,7 @@
     {
       "parameters": {
         "resource": "fileFolder",
-        "queryString": "={{ $json['Folder name'] }}",
+        "queryString": "={{ $json.folder }}",
         "returnAll": true,
         "filter": {},
         "options": {}
@@ -206,8 +206,8 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        32,
-        -48
+        64,
+        -112
       ],
       "id": "1615fa19-a7a1-4753-893b-8f4693838de1",
       "name": "Get folder name",
@@ -226,38 +226,13 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        880,
+        1104,
         -16
       ],
       "id": "33e93d01-2752-4a03-b6f5-dd152a5a52ba",
       "name": "Loop Over Items",
       "alwaysOutputData": false,
       "executeOnce": false
-    },
-    {
-      "parameters": {
-        "sendTo": "={{ $('On form submission').item.json['Email to notify about when job is done'] }}",
-        "subject": "Update images name report",
-        "emailType": "text",
-        "message": "Images names updated.",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.2,
-      "position": [
-        816,
-        -400
-      ],
-      "id": "29c761be-1349-4334-9638-be176961721b",
-      "name": "Send notification",
-      "webhookId": "35eafdde-4ea0-478b-8ad9-0533bc5f0be9",
-      "executeOnce": true,
-      "credentials": {
-        "gmailOAuth2": {
-          "id": "KFPGbHJv7LkB4ouE",
-          "name": "Gmail account"
-        }
-      }
     },
     {
       "parameters": {
@@ -273,7 +248,7 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        1264,
+        1488,
         320
       ],
       "id": "59f7efe6-e514-46d7-9f9e-b0f6add3f8fb",
@@ -315,7 +290,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1152,
+        1376,
         0
       ],
       "id": "8d4ea3b1-9e25-4abf-869a-976af2f144ac",
@@ -335,8 +310,8 @@
           "conditions": [
             {
               "id": "e157cd41-39e2-4f6b-b348-12b5f7790980",
-              "leftValue": "={{ $json['Choose a cloud drive'] }}",
-              "rightValue": "Google drive",
+              "leftValue": "={{ $json.storage}}",
+              "rightValue": "drive",
               "operator": {
                 "type": "string",
                 "operation": "equals",
@@ -353,8 +328,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -208,
-        -32
+        -144,
+        0
       ],
       "id": "2ecd49ac-3bcb-4643-8a92-f60ccc165168",
       "name": "If",
@@ -365,13 +340,13 @@
       "parameters": {
         "resource": "folder",
         "operation": "search",
-        "query": "={{ $json['Folder name'] }}"
+        "query": "={{ $('Edit Fields1').item.json.folder }}"
       },
       "type": "n8n-nodes-base.microsoftOneDrive",
       "typeVersion": 1.1,
       "position": [
-        96,
-        192
+        32,
+        112
       ],
       "id": "082033b1-1a0c-4d7d-ad51-e2435f0ed4bf",
       "name": "Search a folder",
@@ -407,23 +382,11 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        320,
-        192
+        336,
+        208
       ],
       "id": "be684508-1783-4cfa-a079-c3a63eb22d3e",
       "name": "Call 'process_onedrive_images'",
-      "alwaysOutputData": true
-    },
-    {
-      "parameters": {},
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1,
-      "position": [
-        1072,
-        -272
-      ],
-      "id": "f8a81a25-4846-4784-9a4c-63735d37b59a",
-      "name": "finish",
       "alwaysOutputData": true
     },
     {
@@ -434,7 +397,7 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStorePGVector",
       "typeVersion": 1.3,
       "position": [
-        2176,
+        2400,
         -416
       ],
       "id": "0fae17b2-d2b2-4dcf-9cd5-fdfb6cc9bf52",
@@ -453,7 +416,7 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
       "typeVersion": 1,
       "position": [
-        2128,
+        2352,
         -96
       ],
       "id": "cd82b7f1-9e4d-418e-b0be-c4ba7a06e0fb",
@@ -477,7 +440,7 @@
       "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
       "typeVersion": 1.1,
       "position": [
-        2256,
+        2480,
         -224
       ],
       "id": "265d0822-39cf-43a5-8f5a-8e7093b62e29",
@@ -488,11 +451,193 @@
       "type": "@n8n/n8n-nodes-langchain.textSplitterTokenSplitter",
       "typeVersion": 1,
       "position": [
-        2352,
+        2576,
         -32
       ],
       "id": "976d75b0-b256-46a4-9526-4a496eff9e66",
       "name": "Token Splitter"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -864,
+        -16
+      ],
+      "id": "0d4f0d34-10c6-4494-a44c-7da384e4fe25",
+      "name": "Telegram Trigger",
+      "webhookId": "9e43653f-8e32-4e96-a4e8-4339d8dbdb94",
+      "credentials": {
+        "telegramApi": {
+          "id": "5kcyPcjhEjAwrN5o",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c68766e8-e77e-422f-b78a-6d6640da632a",
+              "name": "storage",
+              "value": "={{ $json.message.text.split(\" \")[0].trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "db6bca69-122f-49e7-8e9e-67a57db7e41d",
+              "name": "folder",
+              "value": "={{ $json.message.text.split(\" \")[1].trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "db324984-5f39-4cf5-99cc-c2d80a87b02a",
+              "name": "email",
+              "value": "={{ $json.message.text.split(\" \")[2].trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -640,
+        0
+      ],
+      "id": "0280b54b-47be-4adf-a1ab-ccfcb217ac3a",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "chatId": "453538615",
+        "text": "folder doesn't exist or wrong typing",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        -368
+      ],
+      "id": "891f3481-6ae0-4526-b3fa-0ef1e55a7962",
+      "name": "Send a text message",
+      "webhookId": "d06d92fc-b795-4151-bf31-281d0a17dcf5",
+      "credentials": {
+        "telegramApi": {
+          "id": "5kcyPcjhEjAwrN5o",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        -192
+      ],
+      "id": "d2609823-3535-4071-b323-745ef7b6d7a6",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a2756c42-0b25-4f65-9013-255810b89dc9",
+              "leftValue": "={{ $json.storage }}",
+              "rightValue": "/start",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -416,
+        16
+      ],
+      "id": "52fbcfaa-70d2-4f4d-a32d-c26240a2d857",
+      "name": "skip /start"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "0a420338-4ce0-41ec-a98b-31357e5038c1",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        240,
+        -176
+      ],
+      "id": "7fda0cc5-c9ee-4a6f-b0b7-badbcbc77cc3",
+      "name": "check if folder exists"
+    },
+    {
+      "parameters": {
+        "chatId": "453538615",
+        "text": "All images renamed",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        832,
+        -256
+      ],
+      "id": "223eeebf-2aaa-4fae-ab8b-ce9be327c2b7",
+      "name": "Send a text message1",
+      "webhookId": "1e391cd5-3c52-4751-ae7a-7bbee813a919",
+      "executeOnce": true,
+      "credentials": {
+        "telegramApi": {
+          "id": "5kcyPcjhEjAwrN5o",
+          "name": "Telegram account 2"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -537,13 +682,7 @@
     },
     "On form submission": {
       "main": [
-        [
-          {
-            "node": "If",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "get files in folder": {
@@ -572,7 +711,7 @@
       "main": [
         [
           {
-            "node": "get files in folder",
+            "node": "check if folder exists",
             "type": "main",
             "index": 0
           }
@@ -583,7 +722,7 @@
       "main": [
         [
           {
-            "node": "Send notification",
+            "node": "Send a text message1",
             "type": "main",
             "index": 0
           }
@@ -591,17 +730,6 @@
         [
           {
             "node": "check for only images",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Send notification": {
-      "main": [
-        [
-          {
-            "node": "finish",
             "type": "main",
             "index": 0
           }
@@ -671,7 +799,7 @@
       "main": [
         [
           {
-            "node": "Send notification",
+            "node": "Send a text message1",
             "type": "main",
             "index": 0
           }
@@ -710,9 +838,67 @@
           }
         ]
       ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "skip /start",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "skip /start": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "check if folder exists": {
+      "main": [
+        [
+          {
+            "node": "get files in folder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": true,
+  "active": false,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
@@ -724,7 +910,7 @@
     "callerPolicy": "workflowsFromSameOwner",
     "saveDataErrorExecution": "none"
   },
-  "versionId": "f5c60b47-1361-4fb4-9526-3405566f4dd4",
+  "versionId": "00367179-5891-4d70-97e0-b55a65e7c9ec",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "8e331f6e9dbc1a0bdaa8b033f60823d2768b34b9380cca0d81a8aca083d67ee2"
