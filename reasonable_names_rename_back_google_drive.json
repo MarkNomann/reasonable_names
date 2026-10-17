@@ -1,0 +1,756 @@
+{
+  "name": "reasonable_names_rename_back_google_drive",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{$json.id}}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1840,
+        64
+      ],
+      "id": "d0fcc279-8a16-4dd3-b7bb-e96eb47caa03",
+      "name": "Download file",
+      "alwaysOutputData": true,
+      "retryOnFail": false,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "RZ5BvwHBaUHztC6G",
+          "name": "Google Drive account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1760,
+        -224
+      ],
+      "id": "ac833e51-3bbf-495c-8f2a-bb13e609856c",
+      "name": "No Operation, do nothing1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "formTitle": "Configuration",
+        "formDescription": "Configure a folder to check for photos",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Folder name"
+            },
+            {
+              "fieldLabel": "Email to notify about when job is done",
+              "fieldType": "email"
+            },
+            {
+              "fieldLabel": "Choose a cloud drive",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Google drive"
+                  },
+                  {
+                    "option": "Microsoft OneDrive"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -912,
+        -272
+      ],
+      "id": "8669f942-01f3-46e7-b471-26246ad56f5a",
+      "name": "On form submission",
+      "webhookId": "e14f0167-68b2-45b7-9ebc-b236a9b915f2",
+      "alwaysOutputData": true,
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "=",
+        "returnAll": true,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "={{ $json.id }}",
+            "mode": "id"
+          }
+        },
+        "options": {
+          "fields": [
+            "*"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        496,
+        -112
+      ],
+      "id": "40f2d922-a3fc-4d48-8bd0-48c26f5d7f1b",
+      "name": "get files in folder",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "RZ5BvwHBaUHztC6G",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "={{ $json.folder }}",
+        "returnAll": true,
+        "filter": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        64,
+        -112
+      ],
+      "id": "1615fa19-a7a1-4753-893b-8f4693838de1",
+      "name": "Get folder name",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "RZ5BvwHBaUHztC6G",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1104,
+        -16
+      ],
+      "id": "33e93d01-2752-4a03-b6f5-dd152a5a52ba",
+      "name": "Loop Over Items",
+      "alwaysOutputData": false,
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "newUpdatedFileName": "={{ $json.name }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1616,
+        400
+      ],
+      "id": "59f7efe6-e514-46d7-9f9e-b0f6add3f8fb",
+      "name": "Update image name",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "RZ5BvwHBaUHztC6G",
+          "name": "Google Drive account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "7027b381-0150-4ef4-8a7d-c74d7c6bc9ee",
+              "leftValue": "={{ $json.mimeType.startsWith(\"image/\") }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1376,
+        0
+      ],
+      "id": "8d4ea3b1-9e25-4abf-869a-976af2f144ac",
+      "name": "check for only images",
+      "alwaysOutputData": false,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e157cd41-39e2-4f6b-b348-12b5f7790980",
+              "leftValue": "={{ $json.storage}}",
+              "rightValue": "drive",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -144,
+        0
+      ],
+      "id": "2ecd49ac-3bcb-4643-8a92-f60ccc165168",
+      "name": "If",
+      "alwaysOutputData": false,
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "operation": "search",
+        "query": "={{ $('Edit Fields1').item.json.folder }}"
+      },
+      "type": "n8n-nodes-base.microsoftOneDrive",
+      "typeVersion": 1.1,
+      "position": [
+        32,
+        112
+      ],
+      "id": "082033b1-1a0c-4d7d-ad51-e2435f0ed4bf",
+      "name": "Search a folder",
+      "alwaysOutputData": true,
+      "credentials": {
+        "microsoftOneDriveOAuth2Api": {
+          "id": "bt7M7NRHSVKBr13X",
+          "name": "Microsoft Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "ge1KuQ9caVSHvkP5",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/ge1KuQ9caVSHvkP5",
+          "cachedResultName": "process_onedrive_images"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        336,
+        208
+      ],
+      "id": "be684508-1783-4cfa-a079-c3a63eb22d3e",
+      "name": "Call 'process_onedrive_images'",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -864,
+        -16
+      ],
+      "id": "0d4f0d34-10c6-4494-a44c-7da384e4fe25",
+      "name": "Telegram Trigger",
+      "webhookId": "9e43653f-8e32-4e96-a4e8-4339d8dbdb94",
+      "credentials": {
+        "telegramApi": {
+          "id": "5kcyPcjhEjAwrN5o",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c68766e8-e77e-422f-b78a-6d6640da632a",
+              "name": "storage",
+              "value": "={{ $json.message.text.split(\" \")[0].trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "db6bca69-122f-49e7-8e9e-67a57db7e41d",
+              "name": "folder",
+              "value": "={{ $json.message.text.split(\" \")[1].trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "db324984-5f39-4cf5-99cc-c2d80a87b02a",
+              "name": "email",
+              "value": "={{ $json.message.text.split(\" \")[2].trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -640,
+        0
+      ],
+      "id": "0280b54b-47be-4adf-a1ab-ccfcb217ac3a",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "chatId": "453538615",
+        "text": "folder doesn't exist or wrong typing",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        464,
+        -384
+      ],
+      "id": "891f3481-6ae0-4526-b3fa-0ef1e55a7962",
+      "name": "Send a text message",
+      "webhookId": "d06d92fc-b795-4151-bf31-281d0a17dcf5",
+      "credentials": {
+        "telegramApi": {
+          "id": "5kcyPcjhEjAwrN5o",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        -192
+      ],
+      "id": "d2609823-3535-4071-b323-745ef7b6d7a6",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a2756c42-0b25-4f65-9013-255810b89dc9",
+              "leftValue": "={{ $json.storage }}",
+              "rightValue": "/start",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -416,
+        16
+      ],
+      "id": "52fbcfaa-70d2-4f4d-a32d-c26240a2d857",
+      "name": "skip /start"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "0a420338-4ce0-41ec-a98b-31357e5038c1",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        240,
+        -176
+      ],
+      "id": "7fda0cc5-c9ee-4a6f-b0b7-badbcbc77cc3",
+      "name": "check if folder exists"
+    },
+    {
+      "parameters": {
+        "chatId": "453538615",
+        "text": "All images renamed",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        832,
+        -256
+      ],
+      "id": "223eeebf-2aaa-4fae-ab8b-ce9be327c2b7",
+      "name": "Send a text message1",
+      "webhookId": "1e391cd5-3c52-4751-ae7a-7bbee813a919",
+      "executeOnce": true,
+      "credentials": {
+        "telegramApi": {
+          "id": "5kcyPcjhEjAwrN5o",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5818a317-c1ea-4266-b846-0059172f8d1f",
+              "name": "name",
+              "value": "={{ $json.originalFilename }}",
+              "type": "string"
+            },
+            {
+              "id": "88d2aab8-291d-413b-b5f8-8bfd7c7b809f",
+              "name": "id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        2048,
+        -128
+      ],
+      "id": "9546b3ed-6cd3-4b7d-b6ca-a50889d82341",
+      "name": "Edit Fields2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        []
+      ]
+    },
+    "get files in folder": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get folder name": {
+      "main": [
+        [
+          {
+            "node": "check if folder exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "check for only images",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update image name": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "check for only images": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Get folder name",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Search a folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search a folder": {
+      "main": [
+        [
+          {
+            "node": "Call 'process_onedrive_images'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'process_onedrive_images'": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "skip /start",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "skip /start": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "check if folder exists": {
+      "main": [
+        [
+          {
+            "node": "get files in folder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Update image name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true,
+    "timeSavedMode": "fixed",
+    "timezone": "Europe/Andorra",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": false,
+    "callerPolicy": "workflowsFromSameOwner",
+    "saveDataErrorExecution": "all"
+  },
+  "versionId": "bba4020f-9079-46fe-b5e0-16c714fe8bf2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8e331f6e9dbc1a0bdaa8b033f60823d2768b34b9380cca0d81a8aca083d67ee2"
+  },
+  "nodeGroups": [],
+  "id": "CVyuAhjbFkfccY78",
+  "tags": []
+}

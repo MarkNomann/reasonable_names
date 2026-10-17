@@ -14,10 +14,10 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        1616,
+        1840,
         64
       ],
-      "id": "d0fcc279-8a16-4dd3-b7bb-e96eb47caa03",
+      "id": "31659dc5-16d4-41e6-82c5-4630746cf77e",
       "name": "Download file",
       "alwaysOutputData": true,
       "retryOnFail": false,
@@ -34,10 +34,10 @@
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        1536,
+        1760,
         -224
       ],
-      "id": "ac833e51-3bbf-495c-8f2a-bb13e609856c",
+      "id": "d18a714a-3ca6-44fc-94c6-59af043dd328",
       "name": "No Operation, do nothing1",
       "alwaysOutputData": true
     },
@@ -50,7 +50,8 @@
           "mode": "list",
           "cachedResultName": "llava-phi3:latest"
         },
-        "text": "=Describe image for yourself and give appropriate name to it.Don't imagine anything yourself.\nWrite new name into {{ $json.name }} field and keep {{ $json.id }} field as it is.\nFollow the next 5 rules for image naming:\n\n1. Field \"name\" should be readable in english. \n2. All words must be separated by underscores\n3. No digits allowed at all.\n4. All names should not contain whitespaces at all.\n5. Do not mention names of any countries and cities and castles in \"name\" field if it's not written on an image.\n\nKeep in output only new name with an extension like it was before and {{ $json.id }} \n{\n  \"id\": \"{{ $json.id }}\",\n  \"name\": \"new name\", plus file extension like .jpg .jpeg .png\n  \"description\": your description of an image 100 words maximum. in description include objects like trees,sea,lake, buildings... which you can find on image. Don't make assumptions in which country or city a photo was taken unless you clearly can identify it. Don't give names to buildings on images.\n  \"link_to_download_image\": {{ $json.webViewLink }}\n}\n\n",
+        "text": "=Write a description of the image, and then give an appropriate new name to the image based on the description. Don't imagine anything yourself.\nWrite new name instead of the old {{ $json.name }} field and keep {{ $json.id }} field as it is.\nFollow the next 5 rules for image naming:\n\n1. Field \"name\" should be readable in english. \n2. All words must be separated by underscores.\n3. No digits allowed at all.\n4. All names should not contain whitespaces at all.\n5. Do not mention names of any countries and cities and castles in \"name\" field if it's not written on an image.\n6. All names must be unique.\n7. All names must be renamed with a new name.\nInside the $json.message.content field must have the following JSON format:\n{\n  \"id\": {{ $json.id }},\n  \"name\": new name, plus file extension,\n\"description\": your description of an image, 100 words maximum. in description include objects like trees, sea, lake, buildings... which you can find on image. If there any inscriptions on the image, include it in the name and in description field.Don't make assumptions in which country or city a photo was taken unless you clearly can identify it. Don't give names like \"Effiel Tower\" or \"Sagrada Familia\" to buildings on images.,\n  \"link_to_download_image\": {{ $json.webViewLink }}\n}\n\n",
+        "simplify": false,
         "options": {
           "low_vram": true,
           "num_batch": 256
@@ -59,10 +60,10 @@
       "type": "@n8n/n8n-nodes-langchain.ollama",
       "typeVersion": 1,
       "position": [
-        1936,
+        2160,
         80
       ],
-      "id": "ea8ce012-0c89-4eba-81ff-4bc7ae8166ee",
+      "id": "f5278169-8a29-4f46-a789-6067c607de79",
       "name": "Analyze image",
       "alwaysOutputData": true,
       "credentials": {
@@ -80,25 +81,25 @@
             {
               "id": "ee82c108-d575-45c2-94a2-669b03259f45",
               "name": "=id",
-              "value": "={{ $json.content.match(/\"id\"\\s*:\\s*\"([^\"]+)\"/)?.[1] || '' }}",
+              "value": "= {{ $('Loop Over Items').item.json.id }}",
               "type": "string"
             },
             {
               "id": "9bc20224-b2b6-4f89-8103-732f651e9dbb",
               "name": "=name",
-              "value": "={{ (() => { let raw = $json.content.replace(/```json/gi, '').replace(/```/g, ''); let cleaned = raw.replace(/\"([^\"]*)\"\\s*\\+\\s*\"([^\"]*)\"/g, '\"$1$2\"'); let match = cleaned.match(/\"name\"\\s*:\\s*\"([^\"]+)\"/); let name = match ? match[1] : ''; return /\\.(jpg|jpeg|png|gif|webp)$/i.test(name) ? name : name + '.jpg'; })() }}",
+              "value": "={{ (() => {\n  const raw = $json.message?.content ?? $json.content ?? '';\n  const m = raw.match(/\"name\"\\s*:\\s*\"([^\"]+)\"/);\n  let n = m ? m[1] : '';\n  n = n.toLowerCase().replace(/\\.(jpg|jpeg|png|gif|webp)$/,'').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'').slice(0,50);\n  return n ? n + '.jpg' : '';\n})() }}",
               "type": "string"
             },
             {
               "id": "a52a2dc3-40fa-4d4e-a117-a9f911680f61",
               "name": "description",
-              "value": "={{ $json.content.match(/\"description\"\\s*:\\s*\"([^\"]+)\"/)?.[1] || '' }}",
+              "value": "={{ $json.message.content.match(/\"description\"\\s*:\\s*\"([^\"]+)\"/)?.[1] || '' }}",
               "type": "string"
             },
             {
               "id": "b657865a-4ab3-49de-8474-76a659c4b64d",
               "name": "link",
-              "value": "={{ $json.content.match(/\"link_to_download_image\"\\s*:\\s*\"([^\"]+)\"/)?.[1] || '' }}",
+              "value": "={{ $('Loop Over Items').item.json.webViewLink }}",
               "type": "string"
             }
           ]
@@ -108,10 +109,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.5,
       "position": [
-        2192,
+        2416,
         80
       ],
-      "id": "b5e8bdd5-5510-4025-8db2-392339ed8bf5",
+      "id": "52439bf0-e615-4004-897f-b14c34ce19af",
       "name": "Edit Fields",
       "alwaysOutputData": true
     },
@@ -149,12 +150,12 @@
       "type": "n8n-nodes-base.formTrigger",
       "typeVersion": 2.6,
       "position": [
-        -400,
-        -48
+        -912,
+        -272
       ],
-      "id": "8669f942-01f3-46e7-b471-26246ad56f5a",
+      "id": "248ed59b-9210-430d-a91e-40e7eb0f8880",
       "name": "On form submission",
-      "webhookId": "e14f0167-68b2-45b7-9ebc-b236a9b915f2",
+      "webhookId": "74efb786-1a7f-4ce0-bc1f-872f9ca8b252",
       "alwaysOutputData": true,
       "executeOnce": true
     },
@@ -172,20 +173,17 @@
         },
         "options": {
           "fields": [
-            "mimeType",
-            "id",
-            "name",
-            "webViewLink"
+            "*"
           ]
         }
       },
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        256,
-        -48
+        496,
+        -112
       ],
-      "id": "40f2d922-a3fc-4d48-8bd0-48c26f5d7f1b",
+      "id": "6e1a22f5-210a-482c-93ee-2c0500e7242a",
       "name": "get files in folder",
       "alwaysOutputData": true,
       "credentials": {
@@ -198,7 +196,7 @@
     {
       "parameters": {
         "resource": "fileFolder",
-        "queryString": "={{ $json['Folder name'] }}",
+        "queryString": "={{ $json.folder }}",
         "returnAll": true,
         "filter": {},
         "options": {}
@@ -206,10 +204,10 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        32,
-        -48
+        64,
+        -112
       ],
-      "id": "1615fa19-a7a1-4753-893b-8f4693838de1",
+      "id": "168019c3-8909-4a1e-baaf-b90ccf3b62d5",
       "name": "Get folder name",
       "alwaysOutputData": true,
       "credentials": {
@@ -226,57 +224,32 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        880,
+        1104,
         -16
       ],
-      "id": "33e93d01-2752-4a03-b6f5-dd152a5a52ba",
+      "id": "af3d1a4f-4176-4899-bcfb-469e803d2409",
       "name": "Loop Over Items",
       "alwaysOutputData": false,
       "executeOnce": false
     },
     {
       "parameters": {
-        "sendTo": "={{ $('On form submission').item.json['Email to notify about when job is done'] }}",
-        "subject": "Update images name report",
-        "emailType": "text",
-        "message": "Images names updated.",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.2,
-      "position": [
-        816,
-        -400
-      ],
-      "id": "29c761be-1349-4334-9638-be176961721b",
-      "name": "Send notification",
-      "webhookId": "35eafdde-4ea0-478b-8ad9-0533bc5f0be9",
-      "executeOnce": true,
-      "credentials": {
-        "gmailOAuth2": {
-          "id": "KFPGbHJv7LkB4ouE",
-          "name": "Gmail account"
-        }
-      }
-    },
-    {
-      "parameters": {
         "operation": "update",
         "fileId": {
           "__rl": true,
-          "value": "={{ $json.id }}",
+          "value": "={{ $json.id.trim() }}",
           "mode": "id"
         },
-        "newUpdatedFileName": "={{ $json.name }}",
+        "newUpdatedFileName": "={{ $json.name.trim() }}",
         "options": {}
       },
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        1264,
-        320
+        1616,
+        400
       ],
-      "id": "59f7efe6-e514-46d7-9f9e-b0f6add3f8fb",
+      "id": "3ec5687f-16f8-4337-99dc-396bb9a84b00",
       "name": "Update image name",
       "alwaysOutputData": true,
       "credentials": {
@@ -284,8 +257,7 @@
           "id": "RZ5BvwHBaUHztC6G",
           "name": "Google Drive account"
         }
-      },
-      "onError": "continueRegularOutput"
+      }
     },
     {
       "parameters": {
@@ -315,10 +287,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1152,
+        1376,
         0
       ],
-      "id": "8d4ea3b1-9e25-4abf-869a-976af2f144ac",
+      "id": "860ebf5c-ec39-45ea-83a1-3d5a731727e7",
       "name": "check for only images",
       "alwaysOutputData": false,
       "onError": "continueRegularOutput"
@@ -335,8 +307,8 @@
           "conditions": [
             {
               "id": "e157cd41-39e2-4f6b-b348-12b5f7790980",
-              "leftValue": "={{ $json['Choose a cloud drive'] }}",
-              "rightValue": "Google drive",
+              "leftValue": "={{ $json.storage}}",
+              "rightValue": "drive",
               "operator": {
                 "type": "string",
                 "operation": "equals",
@@ -353,10 +325,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -208,
-        -32
+        -144,
+        0
       ],
-      "id": "2ecd49ac-3bcb-4643-8a92-f60ccc165168",
+      "id": "4bad6e98-7cb8-422f-9edf-c521727507bd",
       "name": "If",
       "alwaysOutputData": false,
       "executeOnce": false
@@ -365,15 +337,15 @@
       "parameters": {
         "resource": "folder",
         "operation": "search",
-        "query": "={{ $json['Folder name'] }}"
+        "query": "={{ $('Edit Fields1').item.json.folder }}"
       },
       "type": "n8n-nodes-base.microsoftOneDrive",
       "typeVersion": 1.1,
       "position": [
-        96,
-        192
+        32,
+        112
       ],
-      "id": "082033b1-1a0c-4d7d-ad51-e2435f0ed4bf",
+      "id": "fe15ea3d-66c1-4b7e-aec1-907b0506f4b7",
       "name": "Search a folder",
       "alwaysOutputData": true,
       "credentials": {
@@ -407,23 +379,11 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        320,
-        192
+        336,
+        208
       ],
-      "id": "be684508-1783-4cfa-a079-c3a63eb22d3e",
+      "id": "756294aa-8076-4532-aaeb-dfcce040315f",
       "name": "Call 'process_onedrive_images'",
-      "alwaysOutputData": true
-    },
-    {
-      "parameters": {},
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1,
-      "position": [
-        1072,
-        -272
-      ],
-      "id": "f8a81a25-4846-4784-9a4c-63735d37b59a",
-      "name": "finish",
       "alwaysOutputData": true
     },
     {
@@ -434,10 +394,10 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStorePGVector",
       "typeVersion": 1.3,
       "position": [
-        2176,
+        2400,
         -416
       ],
-      "id": "0fae17b2-d2b2-4dcf-9cd5-fdfb6cc9bf52",
+      "id": "9113237e-02bb-42f5-b2de-761637cbcb3a",
       "name": "Postgres PGVector Store",
       "credentials": {
         "postgres": {
@@ -453,10 +413,10 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
       "typeVersion": 1,
       "position": [
-        2128,
+        2352,
         -96
       ],
-      "id": "cd82b7f1-9e4d-418e-b0be-c4ba7a06e0fb",
+      "id": "8a71a5bc-e424-4acc-9192-41ada544ab8d",
       "name": "Embeddings Ollama",
       "retryOnFail": true,
       "maxTries": 2,
@@ -470,17 +430,17 @@
     {
       "parameters": {
         "jsonMode": "=expressionData",
-        "jsonData": "={{ $json.description }} \nlink: {{ $json.link }}",
+        "jsonData": "=name: {{ $json.name }}\nlink: {{ $json.link }}\ndescription: {{ $json.description }} ",
         "textSplittingMode": "custom",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
       "typeVersion": 1.1,
       "position": [
-        2256,
+        2480,
         -224
       ],
-      "id": "265d0822-39cf-43a5-8f5a-8e7093b62e29",
+      "id": "1a90840c-9c10-4388-888e-d2adaaf71888",
       "name": "Default Data Loader"
     },
     {
@@ -488,11 +448,193 @@
       "type": "@n8n/n8n-nodes-langchain.textSplitterTokenSplitter",
       "typeVersion": 1,
       "position": [
-        2352,
+        2576,
         -32
       ],
-      "id": "976d75b0-b256-46a4-9526-4a496eff9e66",
+      "id": "73bf1b6d-2c6a-4138-a582-6dce153a8347",
       "name": "Token Splitter"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -864,
+        -16
+      ],
+      "id": "22d77ddd-1c40-4d27-ac5f-71a660abe686",
+      "name": "Telegram Trigger",
+      "webhookId": "d2384b31-1855-4d94-b656-5bfd62bf257a",
+      "credentials": {
+        "telegramApi": {
+          "id": "5kcyPcjhEjAwrN5o",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c68766e8-e77e-422f-b78a-6d6640da632a",
+              "name": "storage",
+              "value": "={{ $json.message.text.split(\" \")[0].trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "db6bca69-122f-49e7-8e9e-67a57db7e41d",
+              "name": "folder",
+              "value": "={{ $json.message.text.split(\" \")[1].trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "db324984-5f39-4cf5-99cc-c2d80a87b02a",
+              "name": "email",
+              "value": "={{ $json.message.text.split(\" \")[2].trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -640,
+        0
+      ],
+      "id": "0bbf45a1-7159-4403-891b-a1ba52113997",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "chatId": "453538615",
+        "text": "folder doesn't exist or wrong typing",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        464,
+        -384
+      ],
+      "id": "5f98aad8-21fd-4786-853e-ecec4b97e003",
+      "name": "Send a text message",
+      "webhookId": "aeb3c2d1-16ac-40fc-9d59-bb4351808b7e",
+      "credentials": {
+        "telegramApi": {
+          "id": "5kcyPcjhEjAwrN5o",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        -192
+      ],
+      "id": "0e01f92f-947b-4e2d-8da3-3a7ab2433ca4",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a2756c42-0b25-4f65-9013-255810b89dc9",
+              "leftValue": "={{ $json.storage }}",
+              "rightValue": "/start",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -416,
+        16
+      ],
+      "id": "4fcf670c-ad99-4dbc-8f70-b3cb4d508145",
+      "name": "skip /start"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "0a420338-4ce0-41ec-a98b-31357e5038c1",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        240,
+        -176
+      ],
+      "id": "136fd2ae-0997-4c65-b491-ff1623241808",
+      "name": "check if folder exists"
+    },
+    {
+      "parameters": {
+        "chatId": "453538615",
+        "text": "All images renamed",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        832,
+        -256
+      ],
+      "id": "3811df1d-1509-4b98-b16d-2bf9ca5557b9",
+      "name": "Send a text message1",
+      "webhookId": "47539c5c-5cd8-4c2c-a13f-27ed04f8599a",
+      "executeOnce": true,
+      "credentials": {
+        "telegramApi": {
+          "id": "5kcyPcjhEjAwrN5o",
+          "name": "Telegram account 2"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -537,13 +679,7 @@
     },
     "On form submission": {
       "main": [
-        [
-          {
-            "node": "If",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "get files in folder": {
@@ -572,7 +708,7 @@
       "main": [
         [
           {
-            "node": "get files in folder",
+            "node": "check if folder exists",
             "type": "main",
             "index": 0
           }
@@ -583,7 +719,7 @@
       "main": [
         [
           {
-            "node": "Send notification",
+            "node": "Send a text message1",
             "type": "main",
             "index": 0
           }
@@ -591,17 +727,6 @@
         [
           {
             "node": "check for only images",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Send notification": {
-      "main": [
-        [
-          {
-            "node": "finish",
             "type": "main",
             "index": 0
           }
@@ -671,7 +796,7 @@
       "main": [
         [
           {
-            "node": "Send notification",
+            "node": "Send a text message1",
             "type": "main",
             "index": 0
           }
@@ -710,26 +835,85 @@
           }
         ]
       ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "skip /start",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "skip /start": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "check if folder exists": {
+      "main": [
+        [
+          {
+            "node": "get files in folder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": true,
+  "active": false,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
     "availableInMCP": true,
     "timeSavedMode": "fixed",
     "timezone": "Europe/Andorra",
-    "saveDataSuccessExecution": "none",
-    "saveManualExecutions": false,
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
     "callerPolicy": "workflowsFromSameOwner",
-    "saveDataErrorExecution": "none"
+    "saveDataErrorExecution": "all",
+    "saveExecutionProgress": true
   },
-  "versionId": "f5c60b47-1361-4fb4-9526-3405566f4dd4",
+  "versionId": "ca10e15a-8286-4af8-b099-8066ff89b33c",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "8e331f6e9dbc1a0bdaa8b033f60823d2768b34b9380cca0d81a8aca083d67ee2"
   },
   "nodeGroups": [],
-  "id": "CVyuAhjbFkfccY78",
+  "id": "yxTgPgLUaK2IyukV",
   "tags": []
 }
