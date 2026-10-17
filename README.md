@@ -12,6 +12,8 @@ Everything AI-related runs **locally** through [Ollama](https://ollama.com). No 
 
 ![Main workflow in n8n](workflow_picture_pgvector_added.png)
 
+**See it in action:** short cartoon demos on TikTok, [@marksismuz](https://www.tiktok.com/@marksismuz).
+
 ---
 
 ## Table of contents
@@ -535,6 +537,7 @@ Released under the **Apache License 2.0**. See [LICENSE](LICENSE). You may use, 
 **Mark Sokolov**, AI automation developer based in Barcelona.
 
 - LinkedIn: [linkedin.com/in/mark-nomann](https://www.linkedin.com/in/mark-nomann/)
+- TikTok: [@marksismuz](https://www.tiktok.com/@marksismuz), short cartoon demos of this project
 - GitHub: [github.com/MarkNomann](https://github.com/MarkNomann/reasonable_names)
 
 Questions, bug reports and ideas are welcome as GitHub issues.
